@@ -12,6 +12,7 @@ pipeline {
         }
         stage('Build Backend') {
             steps {
+                sh 'cd ./basic-erp/backend'
                 sh 'docker-compose build backend'
             }
         }
