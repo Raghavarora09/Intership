@@ -1,4 +1,3 @@
-
 pipeline {
     agent any
     environment {
@@ -7,34 +6,49 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
+                echo 'Starting Checkout Stage...'
                 git 'https://github.com/Raghavarora09/Intership.git'
+                echo 'Completed Checkout Stage'
             }
         }
         stage('Build Backend') {
             steps {
-                sh 'cd ./basic-erp/backend'
-                sh 'docker-compose build backend'
+                echo 'Starting Build Backend Stage...'
+                dir('basic-erp/backend') {
+                    sh 'docker-compose -f ../docker-compose.yml build backend'
+                }
+                echo 'Completed Build Backend Stage'
             }
         }
         stage('Run Tests') {
             steps {
-                sh 'docker-compose run backend npm test'
+                echo 'Starting Run Tests Stage...'
+                dir('basic-erp/backend') {
+                    sh 'docker-compose -f ../docker-compose.yml run backend npm test'
+                }
+                echo 'Completed Run Tests Stage'
             }
         }
         stage('Build Docker Image') {
             steps {
-                script {
-                    docker.build('erp-system-backend:latest')
+                echo 'Starting Build Docker Image Stage...'
+                dir('basic-erp/backend') {
+                    script {
+                        docker.build('erp-system-backend:latest')
+                    }
                 }
+                echo 'Completed Build Docker Image Stage'
             }
         }
         stage('Deploy') {
             steps {
+                echo 'Starting Deploy Stage...'
                 script {
                     docker.withRegistry('https://registry.hub.docker.com', DOCKER_CREDENTIALS_ID) {
                         docker.image('erp-system-backend:latest').push()
                     }
                 }
+                echo 'Completed Deploy Stage'
             }
         }
     }
