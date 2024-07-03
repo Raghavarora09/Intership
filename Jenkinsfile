@@ -7,7 +7,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/VivekKumar432/LPU-Intership-2.git'
+                git 'https://github.com/Raghavarora09/Intership.git'
             }
         }
         stage('Build Backend') {
