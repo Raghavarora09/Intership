@@ -30,7 +30,7 @@ pipeline {
                     def frontendPath = "basic-erp/frontend"
                     if (fileExists(frontendPath)) {
                         echo "Building frontend image..."
-                         bat "docker build -t ${frontendImage}:latest ${frontendPath}"
+                        bat "docker build -t ${frontendImage}:latest ${frontendPath}"
                         bat "docker tag ${frontendImage} raghavarora09/mern-frontend:mern-frontend"
                     } else {
                         error "Frontend directory ${frontendPath} not found"
@@ -78,7 +78,6 @@ pipeline {
                 }
             }
         }
-    }
 
         stage('Start Services') {
             steps {
