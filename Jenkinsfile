@@ -1,54 +1,76 @@
 pipeline {
     agent any
+
     environment {
-        DOCKER_CREDENTIALS_ID = 'dockerhub-credentials'
+        dockerRegistry = "https://index.docker.io/v1/"
+        dockerCreds = credentials('dockerhub-credentials')
+        backendImage = 'mern-backend'
+        frontendImage = 'mern-frontend'
     }
+
     stages {
-        stage('Checkout') {
-            steps {
-                echo 'Starting Checkout Stage...'
-                git branch: 'main', url: 'https://github.com/Raghavarora09/Intership.git'
-                echo 'Completed Checkout Stage'
-            }
-        }
         stage('Build Backend') {
             steps {
-                echo 'Starting Build Backend Stage...'
                 script {
-                    bat 'dir .\\basic-erp\\backend'
-                    bat 'cd .\\basic-erp && docker-compose build backend'
-                }
-                echo 'Completed Build Backend Stage'
-            }
-        }
-        stage('Run Tests') {
-            steps {
-                echo 'Starting Run Tests Stage...'
-                script {
-                    bat 'cd .\\basic-erp && docker-compose run backend npm test'
-                }
-                echo 'Completed Run Tests Stage'
-            }
-        }
-        stage('Build Docker Image') {
-            steps {
-                echo 'Starting Build Docker Image Stage...'
-                script {
-                    bat 'cd .\\basic-erp\\backend && docker build -t erp-system-backend:latest .'
-                }
-                echo 'Completed Build Docker Image Stage'
-            }
-        }
-        stage('Deploy') {
-            steps {
-                echo 'Starting Deploy Stage...'
-                script {
-                    docker.withRegistry('https://registry.hub.docker.com', DOCKER_CREDENTIALS_ID) {
-                        docker.image('erp-system-backend:latest').push()
+                    def backendPath = "basic-erp/backend"
+                    if (fileExists(backendPath)) {
+                        bat "docker build -t ${backendImage}:latest ${backendPath}"
+                        bat "docker tag ${backendImage} raghavarora09/mern-backend:mern-backend"
+                        // bat "docker tag ${backendImage} ${backendImage}:latest"
+
+                    } else {
+                        error "Backend directory ${backendPath} not found"
                     }
                 }
-                echo 'Completed Deploy Stage'
             }
+        }
+
+        stage('Build Frontend') {
+            steps {
+                script {
+                    def frontendPath = "basic-erp/frontend"
+                    if (fileExists(frontendPath)) {
+                        bat "docker build -t ${frontendImage}:latest ${frontendPath}"
+                        bat "docker tag ${frontendImage} raghavarora09/mern-frontend:mern-frontend"
+                    } else {
+                        error "Frontend directory ${frontendPath} not found"
+                    }
+                }
+            }
+        }
+
+        stage('Push Backend') {
+            steps {
+                script {
+                    docker.withRegistry("https://index.docker.io/v1/", 'dockerhub-credentials') {
+                        // bat 'docker login -u thepurpleaxe -p FalconHeavy@01'
+                        // bat 'docker push json101/javapp'
+                        echo "Pushing backend image to Docker Hub"
+                        bat "docker push raghavarora09/mern-backend:${backendImage}"
+                    }
+                }
+            }
+        }
+
+        stage('Push Frontend') {
+            steps {
+                script {
+                    docker.withRegistry(dockerRegistry, 'dockerhub-credentials') {
+                        echo "Pushing frontend image to Docker Hub"
+                        bat "docker push raghavarora09/mern-frontend:${frontendImage}"
+                        // bat "docker push ${frontendImage}:latest"
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'Pipeline completed'
+        }
+        failure {
+            echo 'Pipeline failed'
         }
     }
 }
