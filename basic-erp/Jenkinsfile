@@ -80,6 +80,16 @@ pipeline {
         }
     }
 
+        stage('Start Services') {
+            steps {
+                script {
+                    echo "Starting services with docker-compose..."
+                    bat "docker-compose up -d"
+                }
+            }
+        }
+    }
+
     post {
         always {
             echo 'Pipeline completed'
