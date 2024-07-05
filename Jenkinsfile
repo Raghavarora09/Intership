@@ -15,8 +15,8 @@ pipeline {
             steps {
                 echo 'Starting Build Backend Stage...'
                 script {
-                    bat 'dir .\\basic-erp\\backend' // Corrected path format
-                    bat 'cd .\\basic-erp\\backend && docker-compose build backend' // Corrected path format
+                    bat 'dir .\\basic-erp\\backend'
+                    bat 'cd .\\basic-erp && docker-compose build backend'
                 }
                 echo 'Completed Build Backend Stage'
             }
@@ -25,7 +25,7 @@ pipeline {
             steps {
                 echo 'Starting Run Tests Stage...'
                 script {
-                    bat 'cd .\\basic-erp\\backend && docker-compose run backend npm test' // Corrected path format
+                    bat 'cd .\\basic-erp && docker-compose run backend npm test'
                 }
                 echo 'Completed Run Tests Stage'
             }
@@ -34,7 +34,7 @@ pipeline {
             steps {
                 echo 'Starting Build Docker Image Stage...'
                 script {
-                    bat 'cd .\\basic-erp\\backend && docker build -t erp-system-backend:latest .' // Corrected path format
+                    bat 'cd .\\basic-erp\\backend && docker build -t erp-system-backend:latest .'
                 }
                 echo 'Completed Build Docker Image Stage'
             }
