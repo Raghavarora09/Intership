@@ -1,4 +1,3 @@
-// src/controllers/authController.js
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
@@ -49,9 +48,15 @@ exports.login = async (req, res) => {
     await user.save();
 
     const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    
-    res.json({ token, role: user.role });
+
+    res.cookie('token', token, { httpOnly: true });
+    res.json({ role: user.role });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+};
+
+exports.logout = (req, res) => {
+  res.clearCookie('token');
+  res.json({ message: 'Logged out successfully' });
 };
