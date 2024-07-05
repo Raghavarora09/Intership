@@ -16,6 +16,7 @@ pipeline {
                     if (fileExists(backendPath)) {
                         echo "Building backend image..."
                         bat "docker build -t ${backendImage}:latest ${backendPath}"
+                        bat "docker tag ${backendImage} raghavarora09/mern-backend:mern-backend"
                     } else {
                         error "Backend directory ${backendPath} not found"
                     }
@@ -29,7 +30,8 @@ pipeline {
                     def frontendPath = "basic-erp/frontend"
                     if (fileExists(frontendPath)) {
                         echo "Building frontend image..."
-                        bat "docker build -t ${frontendImage}:latest ${frontendPath}"
+                         bat "docker build -t ${frontendImage}:latest ${frontendPath}"
+                        bat "docker tag ${frontendImage} raghavarora09/mern-frontend:mern-frontend"
                     } else {
                         error "Frontend directory ${frontendPath} not found"
                     }
@@ -59,8 +61,6 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry("https://index.docker.io/v1/", 'dockerhub-credentials') {
-                        // bat 'docker login -u thepurpleaxe -p FalconHeavy@01'
-                        // bat 'docker push json101/javapp'
                         echo "Pushing backend image to Docker Hub"
                         bat "docker push raghavarora09/mern-backend:${backendImage}"
                     }
@@ -74,7 +74,6 @@ pipeline {
                     docker.withRegistry(dockerRegistry, 'dockerhub-credentials') {
                         echo "Pushing frontend image to Docker Hub"
                         bat "docker push raghavarora09/mern-frontend:${frontendImage}"
-                        // bat "docker push ${frontendImage}:latest"
                     }
                 }
             }
