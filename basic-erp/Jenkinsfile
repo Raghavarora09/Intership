@@ -83,7 +83,7 @@ pipeline {
             steps {
                 script {
                     echo "Starting services with docker-compose..."
-                    bat "docker-compose up -d"
+                    bat "docker-compose -f basic-erp/docker-compose.yml up -d"
                 }
             }
         }
