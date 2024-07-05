@@ -4,8 +4,8 @@ pipeline {
     environment {
         dockerRegistry = "https://index.docker.io/v1/"
         dockerCreds = credentials('dockerhub-credentials')
-        backendImage = 'mern-backend'
-        frontendImage = 'mern-frontend'
+        backendImage = 'raghavarora09/mern-backend'
+        frontendImage = 'raghavarora09/mern-frontend'
     }
 
     stages {
@@ -15,9 +15,6 @@ pipeline {
                     def backendPath = "basic-erp/backend"
                     if (fileExists(backendPath)) {
                         bat "docker build -t ${backendImage}:latest ${backendPath}"
-                        bat "docker tag ${backendImage} raghavarora09/mern-backend:mern-backend"
-                        // bat "docker tag ${backendImage} ${backendImage}:latest"
-
                     } else {
                         error "Backend directory ${backendPath} not found"
                     }
@@ -31,7 +28,6 @@ pipeline {
                     def frontendPath = "basic-erp/frontend"
                     if (fileExists(frontendPath)) {
                         bat "docker build -t ${frontendImage}:latest ${frontendPath}"
-                        bat "docker tag ${frontendImage} raghavarora09/mern-frontend:mern-frontend"
                     } else {
                         error "Frontend directory ${frontendPath} not found"
                     }
@@ -42,11 +38,9 @@ pipeline {
         stage('Push Backend') {
             steps {
                 script {
-                    docker.withRegistry("https://index.docker.io/v1/", 'dockerhub-credentials') {
-                        // bat 'docker login -u thepurpleaxe -p FalconHeavy@01'
-                        // bat 'docker push json101/javapp'
+                    docker.withRegistry(dockerRegistry, dockerCreds) {
                         echo "Pushing backend image to Docker Hub"
-                        bat "docker push raghavarora09/mern-backend:${backendImage}"
+                        bat "docker push ${backendImage}:latest"
                     }
                 }
             }
@@ -55,10 +49,9 @@ pipeline {
         stage('Push Frontend') {
             steps {
                 script {
-                    docker.withRegistry(dockerRegistry, 'dockerhub-credentials') {
+                    docker.withRegistry(dockerRegistry, dockerCreds) {
                         echo "Pushing frontend image to Docker Hub"
-                        bat "docker push raghavarora09/mern-frontend:${frontendImage}"
-                        // bat "docker push ${frontendImage}:latest"
+                        bat "docker push ${frontendImage}:latest"
                     }
                 }
             }
