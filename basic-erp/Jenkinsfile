@@ -15,7 +15,7 @@ pipeline {
                     def backendPath = "basic-erp/backend"
                     if (fileExists(backendPath)) {
                         echo "Building backend image..."
-                        bat "docker build -t ${backendImage}:latest ${backendPath}"
+                        bat "docker build -t ${backendImage}:latest"
                     } else {
                         error "Backend directory ${backendPath} not found"
                     }
@@ -29,7 +29,7 @@ pipeline {
                     def frontendPath = "basic-erp/frontend"
                     if (fileExists(frontendPath)) {
                         echo "Building frontend image..."
-                        bat "docker build -t ${frontendImage}:latest ${frontendPath}"
+                        bat "docker build -t ${frontendImage}:latest"
                     } else {
                         error "Frontend directory ${frontendPath} not found"
                     }
@@ -41,7 +41,7 @@ pipeline {
             steps {
                 script {
                     echo "Tagging backend image..."
-                    bat "docker tag ${backendImage}:latest ${backendImage}:${backendImage}"
+                    bat "docker tag ${backendImage}:latest"
                 }
             }
         }
@@ -50,7 +50,7 @@ pipeline {
             steps {
                 script {
                     echo "Tagging frontend image..."
-                    bat "docker tag ${frontendImage}:latest ${frontendImage}:${frontendImage}"
+                    bat "docker tag ${frontendImage}:latest"
                 }
             }
         }
