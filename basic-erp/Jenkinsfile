@@ -4,8 +4,8 @@ pipeline {
     environment {
         dockerRegistry = "https://index.docker.io/v1/"
         dockerCreds = credentials('dockerhub-credentials')
-        backendImage = 'raghavarora09/mern-backend'
-        frontendImage = 'raghavarora09/mern-frontend'
+        backendImage = 'mern-backend'
+        frontendImage = 'mern-frontend'
     }
 
     stages {
@@ -58,9 +58,11 @@ pipeline {
         stage('Push Backend') {
             steps {
                 script {
-                    echo "Pushing backend image to Docker Hub..."
-                    docker.withRegistry(dockerRegistry, dockerCreds) {
-                        bat "docker push ${backendImage}:latest"
+                    docker.withRegistry("https://index.docker.io/v1/", 'dockerhub-credentials') {
+                        // bat 'docker login -u thepurpleaxe -p FalconHeavy@01'
+                        // bat 'docker push json101/javapp'
+                        echo "Pushing backend image to Docker Hub"
+                        bat "docker push raghavarora09/mern-backend:${backendImage}"
                     }
                 }
             }
@@ -69,9 +71,10 @@ pipeline {
         stage('Push Frontend') {
             steps {
                 script {
-                    echo "Pushing frontend image to Docker Hub..."
-                    docker.withRegistry(dockerRegistry, dockerCreds) {
-                        bat "docker push ${frontendImage}:latest"
+                    docker.withRegistry(dockerRegistry, 'dockerhub-credentials') {
+                        echo "Pushing frontend image to Docker Hub"
+                        bat "docker push raghavarora09/mern-frontend:${frontendImage}"
+                        // bat "docker push ${frontendImage}:latest"
                     }
                 }
             }
