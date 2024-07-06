@@ -5,11 +5,12 @@ pipeline {
         stage('Determine OS') {
             steps {
                 script {
-                    def isWindows = isUnix() ? false : true
-                    if (isWindows) {
-                        load 'Jenkinsfile.windows'
+                    if (isUnix()) {
+                        echo "Loading Linux pipeline..."
+                        load 'jenkins/linuxPipeline.groovy'
                     } else {
-                        load 'Jenkinsfile.linux'
+                        echo "Loading Windows pipeline..."
+                        load 'jenkins/windowsPipeline.groovy'
                     }
                 }
             }
