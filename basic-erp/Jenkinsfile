@@ -9,14 +9,33 @@ pipeline {
     }
 
     stages {
+        stage('Determine OS') {
+            steps {
+                script {
+                    if (isUnix()) {
+                        env.IS_LINUX = 'true'
+                        echo "Detected Unix-based system."
+                    } else {
+                        env.IS_WINDOWS = 'true'
+                        echo "Detected Windows system."
+                    }
+                }
+            }
+        }
+
         stage('Build Backend') {
             steps {
                 script {
                     def backendPath = "basic-erp/backend"
                     if (fileExists(backendPath)) {
                         echo "Building backend image..."
-                        sh "docker build -t ${backendImage}:latest ${backendPath}"
-                        sh "docker tag ${backendImage} raghavarora09/mern-backend:mern-backend"
+                        if (env.IS_LINUX) {
+                            sh "docker build -t ${backendImage}:latest ${backendPath}"
+                            sh "docker tag ${backendImage} raghavarora09/mern-backend:mern-backend"
+                        } else if (env.IS_WINDOWS) {
+                            bat "docker build -t ${backendImage}:latest ${backendPath}"
+                            bat "docker tag ${backendImage} raghavarora09/mern-backend:mern-backend"
+                        }
                     } else {
                         error "Backend directory ${backendPath} not found"
                     }
@@ -30,8 +49,13 @@ pipeline {
                     def frontendPath = "basic-erp/frontend"
                     if (fileExists(frontendPath)) {
                         echo "Building frontend image..."
-                        sh "docker build -t ${frontendImage}:latest ${frontendPath}"
-                        sh "docker tag ${frontendImage} raghavarora09/mern-frontend:mern-frontend"
+                        if (env.IS_LINUX) {
+                            sh "docker build -t ${frontendImage}:latest ${frontendPath}"
+                            sh "docker tag ${frontendImage} raghavarora09/mern-frontend:mern-frontend"
+                        } else if (env.IS_WINDOWS) {
+                            bat "docker build -t ${frontendImage}:latest ${frontendPath}"
+                            bat "docker tag ${frontendImage} raghavarora09/mern-frontend:mern-frontend"
+                        }
                     } else {
                         error "Frontend directory ${frontendPath} not found"
                     }
@@ -43,7 +67,11 @@ pipeline {
             steps {
                 script {
                     echo "Tagging backend image..."
-                    sh "docker tag ${backendImage}:latest ${backendImage}:latest"
+                    if (env.IS_LINUX) {
+                        sh "docker tag ${backendImage}:latest ${backendImage}:latest"
+                    } else if (env.IS_WINDOWS) {
+                        bat "docker tag ${backendImage}:latest ${backendImage}:latest"
+                    }
                 }
             }
         }
@@ -52,7 +80,11 @@ pipeline {
             steps {
                 script {
                     echo "Tagging frontend image..."
-                    sh "docker tag ${frontendImage}:latest ${frontendImage}:latest"
+                    if (env.IS_LINUX) {
+                        sh "docker tag ${frontendImage}:latest ${frontendImage}:latest"
+                    } else if (env.IS_WINDOWS) {
+                        bat "docker tag ${frontendImage}:latest ${frontendImage}:latest"
+                    }
                 }
             }
         }
@@ -60,9 +92,13 @@ pipeline {
         stage('Push Backend') {
             steps {
                 script {
-                    docker.withRegistry("https://index.docker.io/v1/", 'dockerhub-credentials') {
+                    docker.withRegistry(dockerRegistry, 'dockerhub-credentials') {
                         echo "Pushing backend image to Docker Hub"
-                        sh "docker push raghavarora09/mern-backend:${backendImage}"
+                        if (env.IS_LINUX) {
+                            sh "docker push raghavarora09/mern-backend:${backendImage}"
+                        } else if (env.IS_WINDOWS) {
+                            bat "docker push raghavarora09/mern-backend:${backendImage}"
+                        }
                     }
                 }
             }
@@ -73,7 +109,11 @@ pipeline {
                 script {
                     docker.withRegistry(dockerRegistry, 'dockerhub-credentials') {
                         echo "Pushing frontend image to Docker Hub"
-                        sh "docker push raghavarora09/mern-frontend:${frontendImage}"
+                        if (env.IS_LINUX) {
+                            sh "docker push raghavarora09/mern-frontend:${frontendImage}"
+                        } else if (env.IS_WINDOWS) {
+                            bat "docker push raghavarora09/mern-frontend:${frontendImage}"
+                        }
                     }
                 }
             }
@@ -83,7 +123,11 @@ pipeline {
             steps {
                 script {
                     echo "Starting services with docker-compose..."
-                    sh "docker-compose -f basic-erp/docker-compose.yml up -d"
+                    if (env.IS_LINUX) {
+                        sh "docker-compose -f basic-erp/docker-compose.yml up -d"
+                    } else if (env.IS_WINDOWS) {
+                        bat "docker-compose -f basic-erp/docker-compose.yml up -d"
+                    }
                 }
             }
         }
@@ -91,10 +135,10 @@ pipeline {
 
     post {
         always {
-            echo 'Pipeline completed'
+            echo 'Main pipeline completed'
         }
         failure {
-            echo 'Pipeline failed'
+            echo 'Main pipeline failed'
         }
     }
 }
